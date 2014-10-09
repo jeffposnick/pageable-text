@@ -173,7 +173,16 @@ The text is specified as child elements, and any standard HTML markup should be 
         }
       },
 
-      _repaginate: function() {
+      /**
+       * The `repaginate` method updates `this.totalPages` based on the current content and layout,
+       * and resets `this.currentPage` to `1`.
+       *
+       * It is automatically called when the element is first added to a page, and can be manually invoked if you
+       * know that you've resized the element or changed its content.
+       *
+       * @method repaginate
+       */
+      repaginate: function() {
         this.async(function() {
           this.totalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
           this.currentPage = 1;
@@ -181,7 +190,7 @@ The text is specified as child elements, and any standard HTML markup should be 
       },
 
       domReady: function() {
-        this._repaginate();
+        this.repaginate();
       }
     });
   </script>
