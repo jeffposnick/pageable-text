@@ -8,6 +8,7 @@
     subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-animation/core-animation.html">
 <link rel="import" href="../core-media-query/core-media-query.html">
 
 <!--
@@ -32,7 +33,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 @homepage https://jeffposnick.github.io/pageable-text
 -->
 <polymer-element name="pageable-text"
-                 attributes="columnGap currentPage edgeFraction fontFamily fontSize selectable text totalPages">
+                 attributes="animationDuration columnGap currentPage edgeFraction fontFamily fontSize selectable text totalPages">
   <template>
     <style>
       :host {
@@ -79,6 +80,11 @@ The text is specified as child elements, and any standard HTML markup should be 
                       on-core-media-change="{{repaginate}}">
     </core-media-query>
 
+    <core-animation id="pageAnimation"
+                    duration="{{animationDuration}}"
+                    on-core-animation-finish="{{_handleAnimationFinish}}">
+    </core-animation>
+
     <!-- We need to use inline styles since the polyfills don't fully support binding to variables in <style> definitions. -->
     <div id="text"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
@@ -90,6 +96,17 @@ The text is specified as child elements, and any standard HTML markup should be 
 
   <script>
     Polymer({
+      /**
+       * The `animationDuration` is the number of milliseconds the page transition animation will run for.
+       *
+       * To disable page transition animations, set to `0`.
+       *
+       * @attribute animationDuration
+       * @type number
+       * @default 150
+       */
+      animationDuration: 150,
+
       /**
        * The `columnGap` is the number of pixels in between each column when the `<pageable-text>` element is
        * wide enough to support multiple columns.
@@ -200,7 +217,28 @@ The text is specified as child elements, and any standard HTML markup should be 
         }
       },
 
-      currentPageChanged: function() {
+      currentPageChanged: function(oldValue, newValue) {
+        var largestPage;
+        if (oldValue < newValue) {
+          largestPage = newValue;
+          this.$.pageAnimation.direction = 'normal';
+        } else {
+          largestPage = oldValue;
+          this.$.pageAnimation.direction = 'reverse';
+        }
+
+        var pageWidth = this.$.text.clientWidth + this.columnGap;
+
+        this.$.pageAnimation.customEffect = function(timeFraction, target) {
+          target.scrollLeft = (largestPage - 2 + timeFraction) * pageWidth;
+        };
+
+        this.$.pageAnimation.play();
+      },
+
+      // Ensure that we have fully moved on to the proper page. This is neccessary since a timeFraction of 1.0 isn't
+      // always passed in to the pageAnimation.
+      _handleAnimationFinish: function() {
         this.$.text.scrollLeft = (this.$.text.clientWidth + this.columnGap) * (this.currentPage - 1);
       },
 
@@ -253,6 +291,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 
       domReady: function() {
         this.repaginate(true);
+        this.$.pageAnimation.target = this.$.text;
       }
     });
   </script>
