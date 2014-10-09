@@ -55,8 +55,8 @@
       </pageable-text>
 
       <p>Page {{currentPage}} of {{totalPages}}</p>
-      <button on-tap="{{handlePreviousPage}}">Previous</button>
-      <button on-tap="{{handleNextPage}}">Next</button>
+      <button on-tap="{{handlePreviousPage}}" disabled?="{{currentPage == 1}}">Previous</button>
+      <button on-tap="{{handleNextPage}}" disabled?="{{currentPage >= totalPages}}">Next</button>
     </template>
 
     <script>
