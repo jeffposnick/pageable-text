@@ -19,6 +19,8 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     <pageable-text selectable
                    columnGap="30"
+                   fontFamily="Helvetica"
+                   fontSize="1.2em"
                    currentPage="{{currentPage}}"
                    totalPages="{{totalPages}}">
       <strong>Lorem</strong> ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -29,7 +31,8 @@ The text is specified as child elements, and any standard HTML markup should be 
 @status alpha
 @homepage https://jeffposnick.github.io/pageable-text
 -->
-<polymer-element name="pageable-text" attributes="columnGap currentPage selectable text totalPages">
+<polymer-element name="pageable-text"
+                 attributes="columnGap currentPage edgeFraction fontFamily fontSize selectable text totalPages">
   <template>
     <style>
       :host {
@@ -73,12 +76,13 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     <core-media-query query="max-width: 640px"
                       queryMatches="{{narrow}}"
-                      on-core-media-change="{{_repaginate}}">
+                      on-core-media-change="{{repaginate}}">
     </core-media-query>
 
+    <!-- We need to use inline styles since the polyfills don't fully support binding to variables in <style> definitions. -->
     <div id="text"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
-         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px;"
+         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}"
          on-click="{{_handleClick}}">
       <content></content>
     </div>
@@ -112,6 +116,44 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @default 1
        */
       currentPage: 1,
+
+      /**
+       * The `edgeFraction` represents the fraction of the entire content that's considered an "edge", for the purpose of navigation.
+       *
+       * When `this.selectable` is `false`, clicking/tapping on the left side of the content will navigate back, and on
+       * the right side will navigate forward. The definition of "left side" is anywhere between [0..`edgeFraction`]% of
+       * the total width of the page, and the definition of "right side" is anywhere between [100-`edgeFraction..100]%
+       * of the total width of the page.
+       *
+       * @attribute edgeFraction
+       * @type number
+       * @default 0.15
+       */
+      edgeFraction: 0.15,
+
+      /**
+       * The `fontFamily` attribute corresponds to the `font-family` style used for the text.
+       *
+       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #text`, `fontFamily`
+       * is an alternative that has the advantage of triggering repagination when it's changed.
+       *
+       * @attribute fontFamily
+       * @type string
+       * @default 'inherit'
+       */
+      fontFamily: 'inherit',
+
+      /**
+       * The `fontSize` attribute corresponds to the `font-size` style used for the text.
+       *
+       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #text`, `fontSize`
+       * is an alternative that has the advantage of triggering repagination when it's changed.
+       *
+       * @attribute fontSize
+       * @type string
+       * @default '100%'
+       */
+      fontSize: '100%',
 
       /**
        * The `selectable` attribute indicates whether or not the text being paginated is selectable.
@@ -162,35 +204,55 @@ The text is specified as child elements, and any standard HTML markup should be 
         this.$.text.scrollLeft = (this.$.text.clientWidth + this.columnGap) * (this.currentPage - 1);
       },
 
+      fontFamilyChanged: function() {
+        this.repaginate(false);
+      },
+
+      fontSizeChanged: function() {
+        this.repaginate(false);
+      },
+
       // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
       _handleClick: function(e) {
-        if (!this.selectable) {
-          if (e.clientX / this.$.text.clientWidth < 0.5) {
+        if (!this.selectable && this.$.text.clientWidth > 0) {
+          var percentOfWidth = e.clientX / this.$.text.clientWidth;
+          if (percentOfWidth <= this.edgeFraction) {
             this.previousPage();
-          } else {
+          } else if (percentOfWidth >= (1 - this.edgeFraction)){
             this.nextPage();
           }
         }
       },
 
       /**
-       * The `repaginate` method updates `this.totalPages` based on the current content and layout,
-       * and resets `this.currentPage` to `1`.
+       * The `repaginate` method updates `this.totalPages` based on the current content and layout.
        *
        * It is automatically called when the element is first added to a page, and can be manually invoked if you
        * know that you've resized the element or changed its content.
        *
        * @method repaginate
+       * @param {boolean} resetCurrentPage If `false`, the ratio between `currentPage` and `totalPages` will be preserved. If `true`, `currentPage` will be set to 1.
        */
-      repaginate: function() {
+      repaginate: function(resetCurrentPage) {
         this.async(function() {
-          this.totalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
-          this.currentPage = 1;
+          var newTotalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
+          var newCurrentPage = 1;
+
+          if (!resetCurrentPage && this.totalPages > 0) {
+            var percentRead = this.currentPage / this.totalPages;
+            newCurrentPage = Math.round(percentRead * newTotalPages);
+            if (newCurrentPage < 1) {
+              newCurrentPage = 1;
+            }
+          }
+
+          this.totalPages = newTotalPages;
+          this.currentPage = newCurrentPage;
         });
       },
 
       domReady: function() {
-        this.repaginate();
+        this.repaginate(true);
       }
     });
   </script>
