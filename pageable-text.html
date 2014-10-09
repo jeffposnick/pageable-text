@@ -1,0 +1,173 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-media-query/core-media-query.html">
+
+<!--
+A Polymer element that simplifies paging through text, e.g. in an eReader.
+
+##### Example
+
+    <pageable-text></pageable-text>
+
+@element pageable-text
+@blurb A Polymer element that simplifies paging through text, e.g. in an eReader.
+@status alpha
+@homepage https://jeffposnick.github.io/pageable-text
+-->
+<polymer-element name="pageable-text" attributes="columnGap currentPage selectable text totalPages">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #text {
+        -webkit-column-width: 1px;
+        -webkit-column-count: 2;
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+        text-align: justify;
+        font-family: serif;
+      }
+
+      .narrow {
+        -webkit-column-count: 1 !important;
+      }
+
+      .selectable {
+        -webkit-user-select: text;
+        cursor: text;
+      }
+
+      .not-selectable {
+        -webkit-user-select: none;
+        cursor: pointer;
+      }
+    </style>
+
+    <core-media-query query="max-width: 640px"
+                      queryMatches="{{narrow}}"
+                      on-core-media-change="{{_repaginate}}">
+    </core-media-query>
+
+    <div id="text"
+         class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
+         style="-webkit-column-gap: {{columnGap}}px;"
+         on-click="{{_handleClick}}">
+      <content></content>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      /**
+       * The `columnGap` is the number of pixels in between each column when the `<pageable-text>` element is
+       * wide enough to support multiple columns.
+       *
+       * This needs to be a number, and the `px` is implied.
+       *
+       * (It would be nice if this supported other units, e.g. `em`, but that's not currently possible.)
+       *
+       * @attribute columnGap
+       * @type number
+       * @default 20
+       */
+      columnGap: 40,
+
+      /**
+       * The `currentPage` attribute reflects the current page.
+       *
+       * The first page is `1`, not `0`!
+       *
+       * You can also update this attribute to jump to a specific page.
+       *
+       * @attribute currentPage
+       * @type number
+       * @default 1
+       */
+      currentPage: 1,
+
+      /**
+       * The `selectable` attribute indicates whether or not the text being paginated is selectable.
+       *
+       * If set to `false`, then text is not selectable and clicking on the text will navigate to the previous/next page
+       * (depending on whether you click on the left or right half of the page.)
+       *
+       * If set to `true`, then the text is selectable and you need to explicitly call the `previousPage()` and
+       * `nextPage()` methods to navigate.
+       *
+       * @attribute selectable
+       * @type boolean
+       * @default false
+       */
+      selectable: false,
+
+      /**
+       * The `totalPages` attribute is set to the total number of pages, assuming that `this.text` is set.
+       *
+       * The `totalPages` value is dynamic, and if the `<pageable-text>` element is resized, it will be updated.
+       *
+       * @attribute totalPages
+       * @type number
+       */
+      totalPages: 0,
+
+      /**
+       * The `nextPage` method displays the next page of text.
+       *
+       * @method nextPage
+       */
+      nextPage: function() {
+        if (this.currentPage < this.totalPages) {
+          this.currentPage++;
+        }
+      },
+
+      /**
+       * The `previousPage` method displays the previous page of text.
+       *
+       * @method previousPage
+       */
+      previousPage: function() {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+        }
+      },
+
+      currentPageChanged: function() {
+        this.$.text.scrollLeft = (this.$.text.clientWidth + this.columnGap) * (this.currentPage - 1);
+      },
+
+      // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
+      _handleClick: function(e) {
+        if (!this.selectable) {
+          if (e.offsetX / this.$.text.clientWidth < 0.5) {
+            this.previousPage();
+          } else {
+            this.nextPage();
+          }
+        }
+      },
+
+      _repaginate: function() {
+        this.async(function() {
+          this.totalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
+          this.currentPage = 1;
+        });
+      },
+
+      domReady: function() {
+        this._repaginate();
+      }
+    });
+  </script>
+</polymer-element>

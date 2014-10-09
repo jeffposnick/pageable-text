@@ -1,4 +1,3 @@
 pageable-text
 =============
-
-A Polymer element that simplifies paging through text, e.g. in an eReader.
+See the [component page](http://jeffposnick.github.io/pageable-text) for more information.
