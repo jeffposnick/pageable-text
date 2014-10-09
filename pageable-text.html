@@ -37,8 +37,12 @@ The text is specified as child elements, and any standard HTML markup should be 
       }
 
       #text {
+        -moz-column-width: 1px;
+        -moz-column-count: 2;
         -webkit-column-width: 1px;
         -webkit-column-count: 2;
+        column-width: 1px;
+        column-count: 2;
         height: 100%;
         width: 100%;
         overflow-x: hidden;
@@ -47,16 +51,22 @@ The text is specified as child elements, and any standard HTML markup should be 
       }
 
       .narrow {
+        -moz-column-count: 1 !important;
         -webkit-column-count: 1 !important;
+        column-count: 1 !important;
       }
 
       .selectable {
+        -moz-user-select: text;
         -webkit-user-select: text;
+        user-select: text;
         cursor: text;
       }
 
       .not-selectable {
+        -moz-user-select: none;
         -webkit-user-select: none;
+        user-select: none;
         cursor: pointer;
       }
     </style>
@@ -68,7 +78,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     <div id="text"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
-         style="-webkit-column-gap: {{columnGap}}px;"
+         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px;"
          on-click="{{_handleClick}}">
       <content></content>
     </div>
@@ -155,7 +165,7 @@ The text is specified as child elements, and any standard HTML markup should be 
       // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
       _handleClick: function(e) {
         if (!this.selectable) {
-          if (e.offsetX / this.$.text.clientWidth < 0.5) {
+          if (e.clientX / this.$.text.clientWidth < 0.5) {
             this.previousPage();
           } else {
             this.nextPage();
