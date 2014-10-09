@@ -26,6 +26,10 @@
     "polymer": "Polymer/polymer#^0.4.2"
   },
   "devDependencies": {
+    "core-ajax": "Polymer/core-ajax#^0.4.2",
+    "core-icon-button": "Polymer/core-icon-button#^0.4.2",
+    "core-icons": "Polymer/core-icons#^0.4.2",
+    "mark-down": "robdodson/mark-down#~0.6.0",
     "web-component-tester": "Polymer/web-component-tester#^0.7.3"
   }
 }

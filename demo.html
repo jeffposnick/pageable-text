@@ -13,64 +13,158 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>&lt;pageable-text> Demo</title>
     <script src="../platform/platform.js"></script>
+    <link rel="import" href="../core-ajax/core-ajax.html">
+    <link rel="import" href="../core-icon-button/core-icon-button.html">
+    <link rel="import" href="../mark-down/mark-down.html">
     <link rel="import" href="pageable-text.html">
 
     <style shim-shadowdom>
-      #lorem-text {
-        margin: 1em;
-        height: 350px;
+      body {
+        font-family: sans-serif;
       }
 
-      #lorem-text /deep/ #text {
+      pageable-text {
+        padding: 1em;
+        background-color: rgb(248, 248, 248);
+        border-radius: 1em;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 40px;
+      }
+
+       pageable-text /deep/ #text {
         font-family: 'Open Sans', Helvetica, sans-serif;
+      }
+
+      #markdown-url {
+        width: 100%;
+      }
+
+      #info {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+      }
+
+      #add {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+      }
+
+      dialog {
+        position: absolute;
+        width: 400px;
+        max-width: 85%;
+        top: 25px;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+      }
+
+      #close {
+        position: absolute;
+        top: 0;
+        right: 0;
       }
     </style>
   </head>
 
-  <body unresolved>
+  <body unresolved fit fullbleed>
     <template id="page-template" is="auto-binding">
-      <p>An example of using <code>&lt;pageable-text></code>:</p>
+      <core-ajax auto
+                 url="{{markdownUrl}}"
+                 handleAs="text"
+                 response="{{markdown}}">
+      </core-ajax>
 
-      <pageable-text id="lorem-text"
+      <pageable-text columnGap="40"
                      currentPage="{{currentPage}}"
                      totalPages="{{totalPages}}">
-        <strong>Lorem</strong> ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <mark-down text="{{markdown}}"></mark-down>
       </pageable-text>
 
-      <p>Page {{currentPage}} of {{totalPages}}</p>
-      <button on-tap="{{handlePreviousPage}}" disabled?="{{currentPage == 1}}">Previous</button>
-      <button on-tap="{{handleNextPage}}" disabled?="{{currentPage >= totalPages}}">Next</button>
+      <div id="info">
+        <core-icon-button icon="arrow-back"
+                          on-tap="{{handlePreviousPage}}"
+                          disabled?="{{currentPage == 1}}">
+        </core-icon-button>
+
+        <span id="current-page">{{currentPage}} of {{totalPages}}</span>
+
+        <core-icon-button icon="arrow-forward"
+                          on-tap="{{handleNextPage}}"
+                          disabled?="{{currentPage >= totalPages}}">
+        </core-icon-button>
+      </div>
+
+      <core-icon-button id="add"
+                        icon="add"
+                        on-tap="{{handleOpenDialog}}">
+      </core-icon-button>
+
+      <dialog>
+        <core-icon-button id="close"
+                          icon="close"
+                          on-tap="{{handleCloseDialog}}">
+        </core-icon-button>
+        <div>
+          <label for="markdown-url">Markdown URL (must support <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>)</label>: <input id="markdown-url" type="text" value="{{markdownUrl}}">
+        </div>
+      </dialog>
     </template>
 
     <script>
       var pageTemplate = document.querySelector('#page-template');
+
+      // rawgit.com serves resources with CORS headers, so it's a good source of URLs.
+      pageTemplate.markdownUrl = 'https://cdn.rawgit.com/slightlyoff/ServiceWorker/master/explainer.md';
+
+      pageTemplate.handleKeypress = function(e) {
+        console.log('keypress', e);
+      };
+
       pageTemplate.addEventListener('template-bound', function() {
-        var loremText = document.querySelector('#lorem-text');
+        var dialog = document.querySelector('dialog');
+
+        pageTemplate.handleOpenDialog = function() {
+          dialog.show();
+        };
+
+        pageTemplate.handleCloseDialog = function() {
+          dialog.close();
+        };
+
+        var pageableText = document.querySelector('pageable-text');
+
+        window.addEventListener('keydown', function(e) {
+          switch (e.keyCode) {
+            case 37:
+              pageableText.previousPage();
+            break;
+
+            case 39:
+              pageableText.nextPage();
+            break;
+          }
+        });
 
         pageTemplate.handlePreviousPage = function() {
-          loremText.previousPage();
+          pageableText.previousPage();
         };
 
         pageTemplate.handleNextPage = function() {
-          loremText.nextPage();
+          pageableText.nextPage();
         };
+
+        var observer = new PathObserver(pageTemplate, 'markdown');
+        observer.open(function() {
+          pageableText.repaginate();
+        });
       });
     </script>
   </body>
