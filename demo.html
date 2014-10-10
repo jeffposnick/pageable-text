@@ -10,6 +10,7 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>&lt;pageable-text> Demo</title>
     <script src="../platform/platform.js"></script>
@@ -18,7 +19,7 @@
     <link rel="import" href="../mark-down/mark-down.html">
     <link rel="import" href="pageable-text.html">
 
-    <style shim-shadowdom>
+    <style>
       body {
         font-family: sans-serif;
       }
@@ -141,13 +142,9 @@
       var pageTemplate = document.querySelector('#page-template');
 
       // rawgit.com serves resources with CORS headers, so it's a good source of URLs.
-      pageTemplate.markdownUrl = 'https://cdn.rawgit.com/slightlyoff/ServiceWorker/master/explainer.md';
+      pageTemplate.markdownUrl = 'https://cdn.rawgit.com/GITenberg/Frankenstein_84/master/84.txt';
       pageTemplate.fontFamily = 'sans-serif';
       pageTemplate.fontSizePercent = 100;
-
-      pageTemplate.handleKeypress = function(e) {
-        console.log('keypress', e);
-      };
 
       pageTemplate.addEventListener('template-bound', function() {
         var dialog = document.querySelector('dialog');
