@@ -69,6 +69,7 @@
       </core-ajax>
 
       <pageable-text columnGap="40"
+                     savedProgressId="{{markdownUrl}}"
                      fontFamily="{{fontFamily}}"
                      fontSize="{{fontSizePercent}}%"
                      currentPage="{{currentPage}}"
@@ -160,7 +161,7 @@
 
         var observer = new PathObserver(pageTemplate, 'markdown');
         observer.open(function() {
-          pageableText.repaginate(true);
+          pageableText.repaginate();
         });
       });
     </script>

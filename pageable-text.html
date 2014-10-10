@@ -9,6 +9,7 @@
 -->
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../core-animation/core-animation.html">
+<link rel="import" href="../core-localstorage/core-localstorage.html">
 <link rel="import" href="../core-media-query/core-media-query.html">
 
 <!--
@@ -33,7 +34,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 @homepage https://jeffposnick.github.io/pageable-text
 -->
 <polymer-element name="pageable-text"
-                 attributes="animationDuration columnGap currentPage edgeFraction fontFamily fontSize selectable text totalPages">
+                 attributes="animationDuration columnGap currentPage edgeFraction fontFamily fontSize savedProgressId selectable text totalPages">
   <template>
     <style>
       :host {
@@ -77,13 +78,20 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     <core-media-query query="max-width: 640px"
                       queryMatches="{{narrow}}"
-                      on-core-media-change="{{repaginate}}">
+                      on-core-media-change="{{_handleCoreMediaChange}}">
     </core-media-query>
 
     <core-animation id="pageAnimation"
                     duration="{{animationDuration}}"
                     on-core-animation-finish="{{_handleAnimationFinish}}">
     </core-animation>
+
+    <template if="{{savedProgressId}}">
+      <core-localstorage id="localstorage"
+                         name="{{savedProgressId}}"
+                         value="{{_percentRead}}"
+                         on-core-localstorage-load="{{_handleCoreLocalstorageLoad}}"></core-localstorage>
+    </template>
 
     <!-- We need to use inline styles since the polyfills don't fully support binding to variables in <style> definitions. -->
     <div id="text"
@@ -173,6 +181,22 @@ The text is specified as child elements, and any standard HTML markup should be 
       fontSize: '100%',
 
       /**
+       * The `savedProgressId` attribute should be set to a unqiue identifier for the text being paginated.
+       *
+       * If the text is loaded from a URL, the URL is a good choice for unqiue identifier. Ditto for a name of a local file.
+       *
+       * If this is set, the percentage of the text that's been read will be stored via `<core-localstorage>` and used
+       * to find the appropriate page to resume reading at the next time the page is loaded.
+       *
+       * If this is not set, then the text will always start on page 1, regardless of past progress.
+       *
+       * @attribute savedProgressId
+       * @type string
+       * @default null
+       */
+      savedProgressId: null,
+
+      /**
        * The `selectable` attribute indicates whether or not the text being paginated is selectable.
        *
        * If set to `false`, then text is not selectable and clicking on the text will navigate to the previous/next page
@@ -193,7 +217,10 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @attribute totalPages
        * @type number
        */
-      totalPages: 0,
+      totalPages: 1,
+
+      _percentRead: 0,
+      _readyToRepaginate: false,
 
       /**
        * The `nextPage` method displays the next page of text.
@@ -234,6 +261,8 @@ The text is specified as child elements, and any standard HTML markup should be 
         };
 
         this.$.pageAnimation.play();
+
+        this._percentRead = newValue / this.totalPages;
       },
 
       // Ensure that we have fully moved on to the proper page. This is neccessary since a timeFraction of 1.0 isn't
@@ -242,12 +271,21 @@ The text is specified as child elements, and any standard HTML markup should be 
         this.$.text.scrollLeft = (this.$.text.clientWidth + this.columnGap) * (this.currentPage - 1);
       },
 
+      _handleCoreMediaChange: function() {
+        this.repaginate();
+      },
+
+      _handleCoreLocalstorageLoad: function() {
+        this._readyToRepaginate = true;
+        this.repaginate();
+      },
+
       fontFamilyChanged: function() {
-        this.repaginate(false);
+        this.repaginate();
       },
 
       fontSizeChanged: function() {
-        this.repaginate(false);
+        this.repaginate();
       },
 
       // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
@@ -269,28 +307,26 @@ The text is specified as child elements, and any standard HTML markup should be 
        * know that you've resized the element or changed its content.
        *
        * @method repaginate
-       * @param {boolean} resetCurrentPage If `false`, the ratio between `currentPage` and `totalPages` will be preserved. If `true`, `currentPage` will be set to 1.
        */
-      repaginate: function(resetCurrentPage) {
-        this.async(function() {
-          var newTotalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
-          var newCurrentPage = 1;
-
-          if (!resetCurrentPage && this.totalPages > 0) {
-            var percentRead = this.currentPage / this.totalPages;
-            newCurrentPage = Math.round(percentRead * newTotalPages);
+      repaginate: function() {
+        // We don't want to repaginate until we've loaded in the previous progress from core-localstorage.
+        // Otherwise, the repagination will cause that value to be overwritten.
+        // Once that's done, we can repaginate anytime a font, size, media-query, etc. changes.
+        if (this._readyToRepaginate || this.savedProgressId == null) {
+          this.async(function() {
+            var newTotalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
+            var newCurrentPage = Math.round(this._percentRead * newTotalPages);
             if (newCurrentPage < 1) {
               newCurrentPage = 1;
             }
-          }
 
-          this.totalPages = newTotalPages;
-          this.currentPage = newCurrentPage;
-        });
+            this.totalPages = newTotalPages;
+            this.currentPage = newCurrentPage;
+          });
+        }
       },
 
       domReady: function() {
-        this.repaginate(true);
         this.$.pageAnimation.target = this.$.text;
       }
     });
