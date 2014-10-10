@@ -28,6 +28,8 @@
     "core-icons": "Polymer/core-icons#^0.4.2",
     "core-media-query": "Polymer/core-media-query#^0.4.2",
     "mark-down": "robdodson/mark-down#~0.6.0",
+    "paper-button": "Polymer/paper-button#^0.4.2",
+    "paper-dialog": "Polymer/paper-dialog#^0.4.2",
     "polymer": "Polymer/polymer#^0.4.2"
   },
   "devDependencies": {

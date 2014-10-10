@@ -17,6 +17,8 @@
     <link rel="import" href="../core-ajax/core-ajax.html">
     <link rel="import" href="../core-icon-button/core-icon-button.html">
     <link rel="import" href="../mark-down/mark-down.html">
+    <link rel="import" href="../paper-button/paper-button.html">
+    <link rel="import" href="../paper-dialog/paper-dialog.html">
     <link rel="import" href="pageable-text.html">
 
     <style>
@@ -52,24 +54,8 @@
         right: 0;
       }
 
-      dialog {
-        position: absolute;
-        width: 400px;
-        max-width: 85%;
-        top: 25px;
-        border: 1px solid rgba(0, 0, 0, 0.3);
-        border-radius: 6px;
-        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-      }
-
-      dialog > div {
-        margin: 0.5em;
-      }
-
-      #close {
-        position: absolute;
-        top: 0;
-        right: 0;
+      paper-dialog > div {
+        margin: 1em;
       }
     </style>
   </head>
@@ -109,12 +95,7 @@
                         on-tap="{{handleOpenDialog}}">
       </core-icon-button>
 
-      <dialog>
-        <core-icon-button id="close"
-                          icon="close"
-                          on-tap="{{handleCloseDialog}}">
-        </core-icon-button>
-
+      <paper-dialog heading="Settings">
         <div>
           <label for="markdown-url">Markdown URL (must support <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>)</label>:
           <input id="markdown-url" type="text" value="{{markdownUrl}}">
@@ -135,7 +116,9 @@
           <label for="font-family">Font</label>:
           <input id="font-family" type="text" value="{{fontFamily}}">
         </div>
-      </dialog>
+
+        <paper-button label="Close" affirmative></paper-button>
+      </paper-dialog>
     </template>
 
     <script>
@@ -150,11 +133,7 @@
         var dialog = document.querySelector('dialog');
 
         pageTemplate.handleOpenDialog = function() {
-          dialog.show();
-        };
-
-        pageTemplate.handleCloseDialog = function() {
-          dialog.close();
+          var dialog = document.querySelector('paper-dialog').toggle();
         };
 
         var pageableText = document.querySelector('pageable-text');
