@@ -4,7 +4,7 @@
   "authors": [
     "Jeff Posnick <jeffy@google.com>"
   ],
-  "description": "Element providing solution to no problem in particular.",
+  "description": "A Polymer element that simplifies paging through text, e.g. in an eReader.",
   "keywords": [
     "web-component",
     "web-components",

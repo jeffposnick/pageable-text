@@ -46,37 +46,41 @@
         bottom: 0;
         width: 100%;
         text-align: center;
+        z-index: 0;
       }
 
       #chapters {
         position: absolute;
         bottom: 0;
         left: 0;
+        z-index: 1;
       }
 
       #settings {
         position: absolute;
         bottom: 0;
         right: 0;
+        z-index: 1;
       }
 
-      #settings-dialog > div {
+      #settings-dialog div {
         margin: 1em;
       }
 
       #chapters-dialog {
-        max-height: 70%;
-        overflow-y: auto;
+        width: 300px;
       }
 
-      #chapters-dialog > ol {
+      #chapters-dialog ol {
         list-style: none;
         margin: 0;
         padding: 0;
+        overflow-y: auto;
+        height: 300px;
       }
 
-      #chapters-dialog > ol > li {
-        margin: 0.5em;
+      #chapters-dialog ol li {
+        margin: 1em;
         cursor: pointer;
       }
 
@@ -104,9 +108,14 @@
                      fontSize="{{fontSizePercent}}%"
                      currentPage="{{currentPage}}"
                      totalPages="{{totalPages}}"
-                     on-pageable-text-repaginate="{{handleRepaginate}}">
+                     chapterElements="{{chapterElements}}">
         <mark-down text="{{markdown}}"></mark-down>
       </pageable-text>
+
+      <core-icon-button id="chapters"
+                        icon="bookmark"
+                        on-tap="{{handleOpenChaptersDialog}}">
+      </core-icon-button>
 
       <div id="info">
         <core-icon-button icon="arrow-back"
@@ -121,11 +130,6 @@
                           disabled?="{{currentPage >= totalPages}}">
         </core-icon-button>
       </div>
-
-      <core-icon-button id="chapters"
-                        icon="bookmark"
-                        on-tap="{{handleOpenChaptersDialog}}">
-      </core-icon-button>
 
       <core-icon-button id="settings"
                         icon="settings"
@@ -206,14 +210,6 @@
 
         pageTemplate.handleNextPage = function() {
           pageableText.nextPage();
-        };
-
-        pageTemplate.handleRepaginate = function() {
-          var matchingElements = pageableText.findMatchingElements(/^Chapter\s/i);
-          matchingElements.forEach(function(element) {
-            element.classList.add('chapter');
-          });
-          pageTemplate.chapterElements = matchingElements;
         };
 
         pageTemplate.handleChapterTap = function(e) {
