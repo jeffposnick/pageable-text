@@ -34,7 +34,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 @homepage https://jeffposnick.github.io/pageable-text
 -->
 <polymer-element name="pageable-text"
-                 attributes="animationDuration columnGap currentPage edgeFraction fontFamily fontSize savedProgressId selectable text totalPages">
+                 attributes="animationDuration chapterElements chapterRegex columnGap currentPage edgeFraction fontFamily fontSize savedProgressId selectable text totalPages">
   <template>
     <style>
       :host {
@@ -114,6 +114,32 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @default 150
        */
       animationDuration: 150,
+
+      /**
+       * The `chapterRegex` attribute is what's used to determine where chapter breaks are in the text.
+       *
+       * If set to null, then there won't be any attempt made to determine where chapters are.
+       *
+       * If non-null, then every element in the `<content>` will be checked to see if its `textContent`
+       * matches. If there's a match, that element is assigned the class `.chapter` and it's added
+       * to the array of chapters exposed via `this.chapterElements`.
+       *
+       * @attribute chapterRegex
+       * @type Regex
+       * @default /^chapter\s/i
+       */
+      chapterRegex: /^chapter\s/i,
+
+      /**
+       * The `chapterElements` attribute contains a array of elements that are chapter headers, as
+       * determined by `this.chapterRegex`.
+       *
+       * The array is recalculated each time `this.repaginate()` is called.
+       *
+       * @attribute chapterElements
+       * @type array
+       */
+      chapterElements: null,
 
       /**
        * The `columnGap` is the number of pixels in between each column when the `<pageable-text>` element is
@@ -313,6 +339,18 @@ The text is specified as child elements, and any standard HTML markup should be 
         // Otherwise, the repagination will cause that value to be overwritten.
         // Once that's done, we can repaginate anytime a font, size, media-query, etc. changes.
         if (this._readyToRepaginate || this.savedProgressId == null) {
+          if (this.chapterRegex) {
+            this.chapterElements = [];
+            var markdownParent = this.$.text.querySelector('content').getDistributedNodes()[1].shadowRoot.querySelector('#markdown');
+            for (var i = 0; i < markdownParent.children.length; i++) {
+              var childElement = markdownParent.children[i];
+              if (this.chapterRegex.test(childElement.textContent)) {
+                childElement.classList.add('chapter');
+                this.chapterElements.push(childElement);
+              }
+            }
+          }
+
           this.async(function() {
             var newTotalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
             var newCurrentPage = Math.round(this._percentRead * newTotalPages);
@@ -324,6 +362,18 @@ The text is specified as child elements, and any standard HTML markup should be 
             this.currentPage = newCurrentPage;
           });
         }
+      },
+
+      /**
+       * The `scrollToElement` updates the current page so that `el` is visible.
+       *
+       * It's particularly useful to use in conjunction with the elements exposed in `this.chapterElements`.
+       *
+       * @method scrollToElement
+       * @param Element The element to scroll to.
+       */
+      scrollToElement: function(el) {
+        this.currentPage = Math.ceil(this.totalPages * el.offsetLeft / this.$.text.scrollWidth);
       },
 
       domReady: function() {

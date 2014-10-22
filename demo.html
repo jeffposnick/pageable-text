@@ -21,7 +21,7 @@
     <link rel="import" href="../paper-dialog/paper-dialog.html">
     <link rel="import" href="pageable-text.html">
 
-    <style>
+    <style shim-shadowdom>
       body {
         font-family: sans-serif;
       }
@@ -46,16 +46,50 @@
         bottom: 0;
         width: 100%;
         text-align: center;
+        z-index: 0;
+      }
+
+      #chapters {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
       }
 
       #settings {
         position: absolute;
         bottom: 0;
         right: 0;
+        z-index: 1;
       }
 
-      paper-dialog > div {
+      #settings-dialog div {
         margin: 1em;
+      }
+
+      #chapters-dialog {
+        width: 300px;
+      }
+
+      #chapters-dialog ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        height: 300px;
+      }
+
+      #chapters-dialog ol li {
+        margin: 1em;
+        cursor: pointer;
+      }
+
+      pageable-text /deep/ .chapter {
+        font-size: 2em;
+        font-variant: small-caps;
+        text-align: center;
+        -webkit-column-break-before: always;
+        break-before: column;
       }
     </style>
   </head>
@@ -73,9 +107,15 @@
                      fontFamily="{{fontFamily}}"
                      fontSize="{{fontSizePercent}}%"
                      currentPage="{{currentPage}}"
-                     totalPages="{{totalPages}}">
+                     totalPages="{{totalPages}}"
+                     chapterElements="{{chapterElements}}">
         <mark-down text="{{markdown}}"></mark-down>
       </pageable-text>
+
+      <core-icon-button id="chapters"
+                        icon="bookmark"
+                        on-tap="{{handleOpenChaptersDialog}}">
+      </core-icon-button>
 
       <div id="info">
         <core-icon-button icon="arrow-back"
@@ -93,10 +133,10 @@
 
       <core-icon-button id="settings"
                         icon="settings"
-                        on-tap="{{handleOpenDialog}}">
+                        on-tap="{{handleOpenSettingsDialog}}">
       </core-icon-button>
 
-      <paper-dialog heading="Settings">
+      <paper-dialog id="settings-dialog" heading="Settings">
         <div>
           <label for="markdown-url">Markdown URL (must support <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>)</label>:
           <input id="markdown-url" type="text" value="{{markdownUrl}}">
@@ -120,6 +160,16 @@
 
         <paper-button affirmative>Close</paper-button>
       </paper-dialog>
+
+      <paper-dialog id="chapters-dialog" heading="Chapters">
+        <ol>
+          <template repeat="{{chapterElement in chapterElements}}">
+            <li on-tap="{{handleChapterTap}}">{{chapterElement.textContent}}</li>
+          </template>
+        </ol>
+
+        <paper-button affirmative>Close</paper-button>
+      </paper-dialog>
     </template>
 
     <script>
@@ -129,12 +179,15 @@
       pageTemplate.markdownUrl = 'https://cdn.rawgit.com/GITenberg/Frankenstein_84/master/84.txt';
       pageTemplate.fontFamily = 'sans-serif';
       pageTemplate.fontSizePercent = 100;
+      pageTemplate.chapterElements = [];
 
       pageTemplate.addEventListener('template-bound', function() {
-        var dialog = document.querySelector('dialog');
+        pageTemplate.handleOpenSettingsDialog = function() {
+          document.querySelector('#settings-dialog').toggle();
+        };
 
-        pageTemplate.handleOpenDialog = function() {
-          var dialog = document.querySelector('paper-dialog').toggle();
+        pageTemplate.handleOpenChaptersDialog = function() {
+          document.querySelector('#chapters-dialog').toggle();
         };
 
         var pageableText = document.querySelector('pageable-text');
@@ -157,6 +210,10 @@
 
         pageTemplate.handleNextPage = function() {
           pageableText.nextPage();
+        };
+
+        pageTemplate.handleChapterTap = function(e) {
+          pageableText.scrollToElement(e.target.templateInstance.model.chapterElement);
         };
 
         var observer = new PathObserver(pageTemplate, 'markdown');
