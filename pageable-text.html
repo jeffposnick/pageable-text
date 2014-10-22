@@ -322,8 +322,34 @@ The text is specified as child elements, and any standard HTML markup should be 
 
             this.totalPages = newTotalPages;
             this.currentPage = newCurrentPage;
+
+            this.asyncFire('pageable-text-repaginate');
           });
         }
+      },
+
+      /**
+       * The `getMarkdownParent` method returns all elements within the rendered Markdown whose
+       * `textContent` matches a specific regex.
+       *
+       * @method findMatchingElements
+       * @param Regex The regex to search for.
+       * @returns Array An array of all elements in the rendered Markdown whose `textContent` matches `regex`.
+       */
+      findMatchingElements: function(regex) {
+        var markdownParent = this.$.text.querySelector('content').getDistributedNodes()[1].shadowRoot.querySelector('#markdown');
+        var matchingElements = [];
+        for (var i = 0; i < markdownParent.children.length; i++) {
+          var textContent = markdownParent.children[i].textContent;
+          if (regex.test(textContent)) {
+            matchingElements.push(markdownParent.children[i]);
+          }
+        }
+        return matchingElements;
+      },
+
+      scrollToElement: function(el) {
+        this.currentPage = Math.ceil(this.totalPages * el.offsetLeft / this.$.text.scrollWidth);
       },
 
       domReady: function() {
