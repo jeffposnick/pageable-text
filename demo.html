@@ -20,6 +20,7 @@
     <link rel="import" href="../paper-button/paper-button.html">
     <link rel="import" href="../paper-dialog/paper-dialog.html">
     <link rel="import" href="pageable-text.html">
+    <link rel="import" href="pageable-text-source-markdown.html">
 
     <style shim-shadowdom>
       body {
@@ -107,9 +108,10 @@
                      fontFamily="{{fontFamily}}"
                      fontSize="{{fontSizePercent}}%"
                      currentPage="{{currentPage}}"
-                     totalPages="{{totalPages}}"
-                     chapterElements="{{chapterElements}}">
-        <mark-down text="{{markdown}}"></mark-down>
+                     totalPages="{{totalPages}}">
+        <pageable-text-source-markdown markdownText="{{markdown}}"
+                                       chapterElements="{{chapterElements}}">
+        </pageable-text-source-markdown>
       </pageable-text>
 
       <core-icon-button id="chapters"
@@ -176,7 +178,7 @@
       var pageTemplate = document.querySelector('#page-template');
 
       // rawgit.com serves resources with CORS headers, so it's a good source of URLs.
-      pageTemplate.markdownUrl = 'https://cdn.rawgit.com/GITenberg/Frankenstein_84/master/84.txt';
+      pageTemplate.markdownUrl = 'https://cdn.rawgit.com/GITenberg/Frankenstein_84/master/84.txt'; //https://cdn.rawgit.com/GITenberg/Essentials-of-Economic-TheoryAs-Applied-to-Modern-Problems-of-Industry-and-Public-Policy_31159/master/31159-8.txt
       pageTemplate.fontFamily = 'sans-serif';
       pageTemplate.fontSizePercent = 100;
       pageTemplate.chapterElements = [];
@@ -215,11 +217,6 @@
         pageTemplate.handleChapterTap = function(e) {
           pageableText.scrollToElement(e.target.templateInstance.model.chapterElement);
         };
-
-        var observer = new PathObserver(pageTemplate, 'markdown');
-        observer.open(function() {
-          pageableText.repaginate();
-        });
       });
     </script>
   </body>

@@ -26,9 +26,9 @@
     "core-animation": "Polymer/core-animation#^0.4.2",
     "core-icon-button": "Polymer/core-icon-button#^0.4.2",
     "core-icons": "Polymer/core-icons#^0.4.2",
-    "core-localstorage": "Polymer/core-localstorage#^0.4.2",
+    "core-localstorage": "jeffposnick/core-localstorage#master",
     "core-media-query": "Polymer/core-media-query#^0.4.2",
-    "mark-down": "robdodson/mark-down#~0.6.0",
+    "mark-down": "jeffposnick/mark-down#master",
     "paper-button": "Polymer/paper-button#^0.4.2",
     "paper-dialog": "Polymer/paper-dialog#^0.4.2",
     "polymer": "Polymer/polymer#^0.4.2"

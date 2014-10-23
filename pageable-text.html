@@ -41,7 +41,7 @@ The text is specified as child elements, and any standard HTML markup should be 
         display: block;
       }
 
-      #text {
+      #container {
         -moz-column-width: 1px;
         -moz-column-count: 2;
         -webkit-column-width: 1px;
@@ -90,14 +90,17 @@ The text is specified as child elements, and any standard HTML markup should be 
       <core-localstorage id="localstorage"
                          name="{{savedProgressId}}"
                          value="{{_percentRead}}"
-                         on-core-localstorage-load="{{_handleCoreLocalstorageLoad}}"></core-localstorage>
+                         useraw
+                         on-core-localstorage-load="{{_handleCoreLocalstorageLoad}}">
+      </core-localstorage>
     </template>
 
     <!-- We need to use inline styles since the polyfills don't fully support binding to variables in <style> definitions. -->
-    <div id="text"
+    <div id="container"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
          style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}"
-         on-click="{{_handleClick}}">
+         on-click="{{_handleClick}}"
+         on-pageable-text-source-updated="{{repaginate}}">
       <content></content>
     </div>
   </template>
@@ -185,8 +188,8 @@ The text is specified as child elements, and any standard HTML markup should be 
       /**
        * The `fontFamily` attribute corresponds to the `font-family` style used for the text.
        *
-       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #text`, `fontFamily`
-       * is an alternative that has the advantage of triggering repagination when it's changed.
+       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #content-container`,
+       * `fontFamily` is an alternative that has the advantage of triggering repagination when it's changed.
        *
        * @attribute fontFamily
        * @type string
@@ -197,8 +200,8 @@ The text is specified as child elements, and any standard HTML markup should be 
       /**
        * The `fontSize` attribute corresponds to the `font-size` style used for the text.
        *
-       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #text`, `fontSize`
-       * is an alternative that has the advantage of triggering repagination when it's changed.
+       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #content-container`,
+       * `fontSize` is an alternative that has the advantage of triggering repagination when it's changed.
        *
        * @attribute fontSize
        * @type string
@@ -209,7 +212,8 @@ The text is specified as child elements, and any standard HTML markup should be 
       /**
        * The `savedProgressId` attribute should be set to a unqiue identifier for the text being paginated.
        *
-       * If the text is loaded from a URL, the URL is a good choice for unqiue identifier. Ditto for a name of a local file.
+       * If the text is loaded from a URL, the URL is a good choice for unqiue identifier.
+       * Ditto for a name of a local file.
        *
        * If this is set, the percentage of the text that's been read will be stored via `<core-localstorage>` and used
        * to find the appropriate page to resume reading at the next time the page is loaded.
@@ -246,7 +250,7 @@ The text is specified as child elements, and any standard HTML markup should be 
       totalPages: 1,
 
       _percentRead: 0,
-      _readyToRepaginate: false,
+      _coreLocalStorageLoaded: false,
 
       /**
        * The `nextPage` method displays the next page of text.
@@ -270,6 +274,10 @@ The text is specified as child elements, and any standard HTML markup should be 
         }
       },
 
+      savedProgressIdChanged: function() {
+        this._coreLocalStorageLoaded = false;
+      },
+
       currentPageChanged: function(oldValue, newValue) {
         var largestPage;
         if (oldValue < newValue) {
@@ -280,7 +288,7 @@ The text is specified as child elements, and any standard HTML markup should be 
           this.$.pageAnimation.direction = 'reverse';
         }
 
-        var pageWidth = this.$.text.clientWidth + this.columnGap;
+        var pageWidth = this.$.container.clientWidth + this.columnGap;
 
         this.$.pageAnimation.customEffect = function(timeFraction, target) {
           target.scrollLeft = (largestPage - 2 + timeFraction) * pageWidth;
@@ -294,7 +302,7 @@ The text is specified as child elements, and any standard HTML markup should be 
       // Ensure that we have fully moved on to the proper page. This is neccessary since a timeFraction of 1.0 isn't
       // always passed in to the pageAnimation.
       _handleAnimationFinish: function() {
-        this.$.text.scrollLeft = (this.$.text.clientWidth + this.columnGap) * (this.currentPage - 1);
+        this.$.container.scrollLeft = (this.$.container.clientWidth + this.columnGap) * (this.currentPage - 1);
       },
 
       _handleCoreMediaChange: function() {
@@ -302,7 +310,11 @@ The text is specified as child elements, and any standard HTML markup should be 
       },
 
       _handleCoreLocalstorageLoad: function() {
-        this._readyToRepaginate = true;
+        if (this._percentRead == null) {
+          this._percentRead = 0;
+        }
+
+        this._coreLocalStorageLoaded = true;
         this.repaginate();
       },
 
@@ -316,8 +328,8 @@ The text is specified as child elements, and any standard HTML markup should be 
 
       // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
       _handleClick: function(e) {
-        if (!this.selectable && this.$.text.clientWidth > 0) {
-          var percentOfWidth = e.clientX / this.$.text.clientWidth;
+        if (!this.selectable && this.$.container.clientWidth > 0) {
+          var percentOfWidth = e.clientX / this.$.container.clientWidth;
           if (percentOfWidth <= this.edgeFraction) {
             this.previousPage();
           } else if (percentOfWidth >= (1 - this.edgeFraction)){
@@ -338,21 +350,9 @@ The text is specified as child elements, and any standard HTML markup should be 
         // We don't want to repaginate until we've loaded in the previous progress from core-localstorage.
         // Otherwise, the repagination will cause that value to be overwritten.
         // Once that's done, we can repaginate anytime a font, size, media-query, etc. changes.
-        if (this._readyToRepaginate || this.savedProgressId == null) {
-          if (this.chapterRegex) {
-            this.chapterElements = [];
-            var markdownParent = this.$.text.querySelector('content').getDistributedNodes()[1].shadowRoot.querySelector('#markdown');
-            for (var i = 0; i < markdownParent.children.length; i++) {
-              var childElement = markdownParent.children[i];
-              if (this.chapterRegex.test(childElement.textContent)) {
-                childElement.classList.add('chapter');
-                this.chapterElements.push(childElement);
-              }
-            }
-          }
-
+        if (this._coreLocalStorageLoaded || this.savedProgressId == null) {
           this.async(function() {
-            var newTotalPages = Math.ceil(this.$.text.scrollWidth / (this.$.text.clientWidth + this.columnGap));
+            var newTotalPages = Math.ceil(this.$.container.scrollWidth / (this.$.container.clientWidth + this.columnGap));
             var newCurrentPage = Math.round(this._percentRead * newTotalPages);
             if (newCurrentPage < 1) {
               newCurrentPage = 1;
@@ -373,11 +373,11 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @param Element The element to scroll to.
        */
       scrollToElement: function(el) {
-        this.currentPage = Math.ceil(this.totalPages * el.offsetLeft / this.$.text.scrollWidth);
+        this.currentPage = Math.ceil(this.totalPages * el.offsetLeft / this.$.container.scrollWidth);
       },
 
       domReady: function() {
-        this.$.pageAnimation.target = this.$.text;
+        this.$.pageAnimation.target = this.$.container;
       }
     });
   </script>
