@@ -296,7 +296,14 @@ The text is specified as child elements, and any standard HTML markup should be 
 
         this.$.pageAnimation.play();
 
-        this._percentRead = newValue / this.totalPages;
+        // Special case where newValue is set to 1, which always should indicate the very first page and is equivalent
+        // to setting _percentRead to 0. This is a workaround for the fact that the smallest value for currentPage
+        // is 1 and not 0.
+        if (newValue === 1) {
+          this._percentRead = 0;
+        } else {
+          this._percentRead = newValue / this.totalPages;
+        }
       },
 
       // Ensure that we have fully moved on to the proper page. This is neccessary since a timeFraction of 1.0 isn't
@@ -353,7 +360,7 @@ The text is specified as child elements, and any standard HTML markup should be 
         if (this._coreLocalStorageLoaded || this.savedProgressId == null) {
           this.async(function() {
             var newTotalPages = Math.ceil(this.$.container.scrollWidth / (this.$.container.clientWidth + this.columnGap));
-            var newCurrentPage = Math.round(this._percentRead * newTotalPages);
+            var newCurrentPage = Math.floor(this._percentRead * newTotalPages);
             if (newCurrentPage < 1) {
               newCurrentPage = 1;
             }
