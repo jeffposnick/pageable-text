@@ -81,11 +81,6 @@ The text is specified as child elements, and any standard HTML markup should be 
                       on-core-media-change="{{_handleCoreMediaChange}}">
     </core-media-query>
 
-    <core-animation id="pageAnimation"
-                    duration="{{animationDuration}}"
-                    on-core-animation-finish="{{_handleAnimationFinish}}">
-    </core-animation>
-
     <template if="{{savedProgressId}}">
       <core-localstorage id="localstorage"
                          name="pageable-text-{{savedProgressId}}"
@@ -102,6 +97,12 @@ The text is specified as child elements, and any standard HTML markup should be 
          on-pageable-text-source-updated="{{repaginate}}">
       <content></content>
     </div>
+
+    <core-animation id="pageAnimation"
+                    target="{{$.container}}"
+                    duration="{{animationDuration}}"
+                    on-core-animation-finish="{{_handleAnimationFinish}}">
+    </core-animation>
   </template>
 
   <script>
@@ -354,10 +355,6 @@ The text is specified as child elements, and any standard HTML markup should be 
        */
       scrollToElement: function(el) {
         this.currentPage = Math.ceil(this.totalPages * el.offsetLeft / this.$.container.scrollWidth);
-      },
-
-      domReady: function() {
-        this.$.pageAnimation.target = this.$.container;
       }
     });
   </script>
