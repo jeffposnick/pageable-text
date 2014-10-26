@@ -34,7 +34,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 @homepage https://jeffposnick.github.io/pageable-text
 -->
 <polymer-element name="pageable-text"
-                 attributes="animationDuration chapterElements chapterRegex columnGap currentPage edgeFraction fontFamily fontSize savedProgressId selectable text totalPages">
+                 attributes="animationDuration chapterElements chapterRegex columnGap currentPage fontFamily fontSize savedProgressId selectable text totalPages">
   <template>
     <style>
       :host {
@@ -88,7 +88,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     <template if="{{savedProgressId}}">
       <core-localstorage id="localstorage"
-                         name="{{savedProgressId}}"
+                         name="pageable-text-{{savedProgressId}}"
                          value="{{_percentRead}}"
                          useraw
                          on-core-localstorage-load="{{_handleCoreLocalstorageLoad}}">
@@ -99,7 +99,6 @@ The text is specified as child elements, and any standard HTML markup should be 
     <div id="container"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
          style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}"
-         on-click="{{_handleClick}}"
          on-pageable-text-source-updated="{{repaginate}}">
       <content></content>
     </div>
@@ -170,20 +169,6 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @default 1
        */
       currentPage: 1,
-
-      /**
-       * The `edgeFraction` represents the fraction of the entire content that's considered an "edge", for the purpose of navigation.
-       *
-       * When `this.selectable` is `false`, clicking/tapping on the left side of the content will navigate back, and on
-       * the right side will navigate forward. The definition of "left side" is anywhere between [0..`edgeFraction`]% of
-       * the total width of the page, and the definition of "right side" is anywhere between [(100-`edgeFraction`)..100]%
-       * of the total width of the page.
-       *
-       * @attribute edgeFraction
-       * @type number
-       * @default 0.15
-       */
-      edgeFraction: 0.15,
 
       /**
        * The `fontFamily` attribute corresponds to the `font-family` style used for the text.
@@ -331,18 +316,6 @@ The text is specified as child elements, and any standard HTML markup should be 
 
       fontSizeChanged: function() {
         this.repaginate();
-      },
-
-      // This needs to be a click handler rather than a tap handler, as it relies on offsetX.
-      _handleClick: function(e) {
-        if (!this.selectable && this.$.container.clientWidth > 0) {
-          var percentOfWidth = e.clientX / this.$.container.clientWidth;
-          if (percentOfWidth <= this.edgeFraction) {
-            this.previousPage();
-          } else if (percentOfWidth >= (1 - this.edgeFraction)){
-            this.nextPage();
-          }
-        }
       },
 
       /**
