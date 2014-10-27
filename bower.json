@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "core-ajax": "Polymer/core-ajax#^0.4.2",
-    "core-animation": "Polymer/core-animation#^0.4.2",
+    "core-animation": "jeffposnick/core-animation#master",
     "core-icon-button": "Polymer/core-icon-button#^0.4.2",
     "core-icons": "Polymer/core-icons#^0.4.2",
     "core-localstorage": "jeffposnick/core-localstorage#master",
