@@ -331,6 +331,10 @@ The text is specified as child elements, and any standard HTML markup should be 
         this.repaginate();
       },
 
+      lineHeightChanged: function() {
+        this.repaginate();
+      },
+
       /**
        * The `repaginate` method updates `this.totalPages` based on the current content and layout.
        *
