@@ -34,7 +34,7 @@ The text is specified as child elements, and any standard HTML markup should be 
 @homepage https://jeffposnick.github.io/pageable-text
 -->
 <polymer-element name="pageable-text"
-                 attributes="animationDuration chapterElements chapterRegex columnGap currentPage fontFamily fontSize savedProgressId selectable text totalPages">
+                 attributes="animationDuration chapterElements chapterRegex columnGap currentPage fontFamily fontSize lineHeight savedProgressId selectable text totalPages">
   <template>
     <style>
       :host {
@@ -93,7 +93,7 @@ The text is specified as child elements, and any standard HTML markup should be 
     <!-- We need to use inline styles since the polyfills don't fully support binding to variables in <style> definitions. -->
     <div id="container"
          class="{{ {narrow: narrow, selectable: selectable, 'not-selectable': !selectable} | tokenList }}"
-         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}"
+         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}; line-height: {{lineHeight}};"
          on-pageable-text-source-updated="{{repaginate}}">
       <content></content>
     </div>
@@ -194,6 +194,18 @@ The text is specified as child elements, and any standard HTML markup should be 
        * @default '100%'
        */
       fontSize: '100%',
+
+      /**
+       * The `lineHeight` attribute corresponds to the `line-height` style used for the text.
+       *
+       * While it's possible to apply arbitrary styles from the host page via `page-element /deep/ #content-container`,
+       * `lineHeight` is an alternative that has the advantage of triggering repagination when it's changed.
+       *
+       * @attribute lineHeight
+       * @type number
+       * @default 1.2
+       */
+      lineHeight: 1.2,
 
       /**
        * The `savedProgressId` attribute should be set to a unqiue identifier for the text being paginated.
