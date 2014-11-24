@@ -13,7 +13,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>&lt;pageable-text> Demo</title>
-    <script src="../platform/platform.js"></script>
+    <script src="../webcomponentsjs/webcomponents.min.js"></script>
     <link rel="import" href="../core-ajax/core-ajax.html">
     <link rel="import" href="../core-icon-button/core-icon-button.html">
     <link rel="import" href="../mark-down/mark-down.html">
@@ -64,15 +64,15 @@
         z-index: 1;
       }
 
-      #settings-dialog div {
+      html /deep/ #settings-dialog div {
         margin: 1em;
       }
 
-      #chapters-dialog {
-        width: 300px;
+      html /deep/ #chapters-dialog::shadow #scroller {
+        width: 200px;
       }
 
-      #chapters-dialog ol {
+      html /deep/ #chapters-dialog ol {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -80,7 +80,7 @@
         height: 300px;
       }
 
-      #chapters-dialog ol li {
+      html /deep/ #chapters-dialog ol li {
         margin: 1em;
         cursor: pointer;
       }
@@ -138,7 +138,7 @@
                         on-tap="{{handleOpenSettingsDialog}}">
       </core-icon-button>
 
-      <paper-dialog id="settings-dialog" heading="Settings">
+      <paper-dialog id="settings-dialog" heading="Settings" transition="core-transition-center">
         <div>
           <label for="markdown-url">Markdown URL (must support <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>)</label>:
           <input id="markdown-url" type="text" value="{{markdownUrl}}">
@@ -159,18 +159,14 @@
           <label for="font-family">Font</label>:
           <input id="font-family" type="text" value="{{fontFamily}}">
         </div>
-
-        <paper-button affirmative>Close</paper-button>
       </paper-dialog>
 
-      <paper-dialog id="chapters-dialog" heading="Chapters">
+      <paper-dialog id="chapters-dialog" heading="Chapters" transition="core-transition-center">
         <ol>
           <template repeat="{{chapterElement in chapterElements}}">
             <li on-tap="{{handleChapterTap}}">{{chapterElement.textContent}}</li>
           </template>
         </ol>
-
-        <paper-button affirmative>Close</paper-button>
       </paper-dialog>
     </template>
 
