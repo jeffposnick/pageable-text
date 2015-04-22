@@ -67,7 +67,7 @@ The text is specified as child elements, and any standard HTML markup should be 
     properties: {
       animationDuration: {
         type: Number,
-        value: 150
+        value: 50
       },
 
       columnGap: {
@@ -120,6 +120,10 @@ The text is specified as child elements, and any standard HTML markup should be 
     },
 
     currentPageChanged: function(newValue, oldValue) {
+      if (oldValue === undefined) {
+        return;
+      }
+
       var largestPage;
       var animationDirection;
       var offset;
@@ -139,13 +143,20 @@ The text is specified as child elements, and any standard HTML markup should be 
       }
 
       var pageWidth = this.$.container.clientWidth + this.$.container.offsetLeft;
-      if (this._animation) {
-        this._animation.play();
-      }
-      this.$.container.scrollLeft = (largestPage - offset) * pageWidth;
-      if (this._animation) {
-        this._animation.play();
-      }
+
+      var fadeOut = this.$.container.animate([
+        {opacity: 1},
+        {opacity: 0}
+      ], {
+        duration: this.animationDuration,
+        fill: 'forwards'
+      });
+
+      fadeOut.finished.then(function() {
+        this.$.container.scrollLeft = (largestPage - offset) * pageWidth;
+      }.bind(this)).then(function() {
+        fadeOut.reverse();
+      });
     },
 
     repaginate: function() {
@@ -162,14 +173,6 @@ The text is specified as child elements, and any standard HTML markup should be 
     _percentRead: 0,
 
     ready: function() {
-      this._animation = this.$.container.animate([
-        {opacity: 0},
-        {opacity: 1}
-      ], {
-        duration: this.animationDuration,
-        direction: 'alternate',
-        fill: 'both'
-      });
       this.async(this.repaginate, 1);
     }
   });
