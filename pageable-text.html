@@ -51,8 +51,7 @@ The text is specified as child elements, and any standard HTML markup should be 
   </style>
 
   <template>
-    <div id="container"
-         style="-webkit-column-gap: {{columnGap}}px; -moz-column-gap: {{columnGap}}px; column-gap: {{columnGap}}px; font-family: '{{fontFamily}}'; font-size: {{fontSize}}; line-height: {{lineHeight}};">
+    <div id="container" style$="{{_computeStyle(columnGap, fontFamily, fontSize, lineHeight)}}">
       <content></content>
     </div>
   </template>
@@ -168,6 +167,12 @@ The text is specified as child elements, and any standard HTML markup should be 
 
       this.totalPages = newTotalPages;
       this.currentPage = newCurrentPage;
+    },
+
+    _computeStyle: function(columnGap, fontFamily, fontSize, lineHeight) {
+      return '-webkit-column-gap: ' + columnGap + 'px; -moz-column-gap: ' + columnGap +
+             'px; column-gap: ' + columnGap + 'px; font-family: ' + fontFamily + '; font-size: ' +
+             fontSize + '; line-height: ' + lineHeight;
     },
 
     _percentRead: 0,
