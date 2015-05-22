@@ -32,26 +32,16 @@ The text is specified as child elements, and any standard HTML markup should be 
 -->
 <dom-module id="pageable-text">
   <style>
-    :host {
-      display: block;
-    }
-
     #container {
-      -moz-column-width: 1px;
-      -moz-column-count: 2;
-      -webkit-column-width: 1px;
-      -webkit-column-count: 2;
-      column-width: 1px;
-      column-count: 2;
       height: 100%;
-      width: 100%;
       overflow-x: hidden;
       text-align: justify;
+      width: 100%;
     }
   </style>
 
   <template>
-    <div id="container" style$="{{_computeStyle(columnGap, fontFamily, fontSize, lineHeight)}}">
+    <div id="container">
       <content></content>
     </div>
   </template>
@@ -82,19 +72,16 @@ The text is specified as child elements, and any standard HTML markup should be 
       },
 
       fontFamily: {
-        //observer: 'repaginate',
         type: String,
         value: 'serif'
       },
 
       fontSize: {
-        //observer: 'repaginate',
         type: String,
         value: '100%'
       },
 
       lineHeight: {
-        //observer: 'repaginate',
         type: Number,
         value: 1.2
       },
@@ -105,6 +92,10 @@ The text is specified as child elements, and any standard HTML markup should be 
         value: 1
       }
     },
+
+    observers: [
+      '_layoutChanges(columnGap, fontFamily, fontSize, lineHeight, _columns)'
+    ],
 
     nextPage: function() {
       if (this.currentPage < this.totalPages) {
@@ -155,15 +146,30 @@ The text is specified as child elements, and any standard HTML markup should be 
       this.currentPage = newCurrentPage;
     },
 
-    _computeStyle: function(columnGap, fontFamily, fontSize, lineHeight) {
+    _layoutChanges: function(columnGap, fontFamily, fontSize, lineHeight, columns) {
+      this.$.container.setAttribute('style', this._computeStyle(columnGap, fontFamily, fontSize, lineHeight, columns));
+      this.async(this.repaginate, 1);
+    },
+
+    _computeStyle: function(columnGap, fontFamily, fontSize, lineHeight, columns) {
       return '-webkit-column-gap: ' + columnGap + 'px; -moz-column-gap: ' + columnGap +
              'px; column-gap: ' + columnGap + 'px; font-family: ' + fontFamily + '; font-size: ' +
-             fontSize + '; line-height: ' + lineHeight;
+             fontSize + '; line-height: ' + lineHeight + '; -webkit-column-count: ' + columns +
+             '; -moz-column-count: ' + columns + '; column-count: ' + columns + ';';
     },
 
     _percentRead: 0,
+    _columns: 1,
+
+    _windowResize: function() {
+      var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      this._columns = width > 600 ? 2 : 1;
+    },
 
     ready: function() {
+      window.addEventListener('resize', this._windowResize.bind(this));
+      this._windowResize();
+
       this.async(this.repaginate, 1);
     }
   });
