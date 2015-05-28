@@ -1,0 +1,7 @@
+{
+  "name": "pageable-text#gh-pages",
+  "private": true,
+  "dependencies": {
+    "pageable-text": "jeffposnick/pageable-text#master"
+  }
+}

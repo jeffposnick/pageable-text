@@ -1,0 +1,176 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="web-animations-import.html">
+
+<!--
+A Polymer element that simplifies paging through text, e.g. in an eReader.
+
+The text is specified as child elements, and any standard HTML markup should be properly displayed.
+
+##### Example
+
+    <pageable-text selectable
+                   columnGap="30"
+                   fontFamily="Helvetica"
+                   fontSize="1.2em"
+                   currentPage="{{currentPage}}"
+                   totalPages="{{totalPages}}">
+      <strong>Lorem</strong> ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </pageable-text>
+
+@element pageable-text
+@blurb A Polymer element that simplifies paging through text, e.g. in an eReader.
+@status alpha
+@homepage https://jeffposnick.github.io/pageable-text
+-->
+<dom-module id="pageable-text">
+  <style>
+    #container {
+      height: 100%;
+      overflow-x: hidden;
+      text-align: justify;
+      width: 100%;
+    }
+  </style>
+
+  <template>
+    <div id="container">
+      <content></content>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  'use strict';
+
+  Polymer({
+    is: 'pageable-text',
+
+    properties: {
+      animationDuration: {
+        type: Number,
+        value: 25
+      },
+
+      columnGap: {
+        type: Number,
+        value: 40
+      },
+
+      currentPage: {
+        notify: true,
+        observer: 'currentPageChanged',
+        type: Number,
+        value: 1
+      },
+
+      fontFamily: {
+        type: String,
+        value: 'serif'
+      },
+
+      fontSize: {
+        type: String,
+        value: '100%'
+      },
+
+      lineHeight: {
+        type: Number,
+        value: 1.2
+      },
+
+      totalPages: {
+        notify: true,
+        type: Number,
+        value: 1
+      }
+    },
+
+    observers: [
+      '_layoutChanges(columnGap, fontFamily, fontSize, lineHeight, _columns)'
+    ],
+
+    nextPage: function() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
+    previousPage: function() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    currentPageChanged: function(newValue, oldValue) {
+      if (oldValue === undefined) {
+        return;
+      }
+
+      if (newValue === 1) {
+        this._percentRead = 0;
+      } else {
+        this._percentRead = newValue / this.totalPages;
+      }
+
+      var fadeOut = this.$.container.animate([
+        {opacity: 1},
+        {opacity: 0}
+      ], {
+        duration: this.animationDuration,
+        fill: 'forwards'
+      });
+
+      fadeOut.finished.then(function() {
+        this.$.container.scrollLeft = (newValue - 1) * (this.$.container.clientWidth + this.columnGap);
+      }.bind(this)).then(function() {
+        fadeOut.reverse();
+      });
+    },
+
+    repaginate: function() {
+      var newTotalPages = Math.ceil(this.$.container.scrollWidth / (this.$.container.clientWidth + this.columnGap));
+      var newCurrentPage = Math.floor(this._percentRead * newTotalPages);
+      if (newCurrentPage < 1) {
+        newCurrentPage = 1;
+      }
+
+      this.totalPages = newTotalPages;
+      this.currentPage = newCurrentPage;
+    },
+
+    _layoutChanges: function(columnGap, fontFamily, fontSize, lineHeight, columns) {
+      this.$.container.setAttribute('style', this._computeStyle(columnGap, fontFamily, fontSize, lineHeight, columns));
+      this.async(this.repaginate, 1);
+    },
+
+    _computeStyle: function(columnGap, fontFamily, fontSize, lineHeight, columns) {
+      return '-webkit-column-gap: ' + columnGap + 'px; -moz-column-gap: ' + columnGap +
+             'px; column-gap: ' + columnGap + 'px; font-family: ' + fontFamily + '; font-size: ' +
+             fontSize + '; line-height: ' + lineHeight + '; -webkit-column-count: ' + columns +
+             '; -moz-column-count: ' + columns + '; column-count: ' + columns + ';';
+    },
+
+    _percentRead: 0,
+    _columns: 1,
+
+    _windowResize: function() {
+      var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      this._columns = width > 600 ? 2 : 1;
+    },
+
+    ready: function() {
+      window.addEventListener('resize', this._windowResize.bind(this));
+      this._windowResize();
+
+      this.async(this.repaginate, 1);
+    }
+  });
+</script>
