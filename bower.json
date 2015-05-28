@@ -25,10 +25,8 @@
     "tests"
   ],
   "dependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#~0.9.6",
     "polymer": "Polymer/polymer#~1.0.0",
     "web-animations": "web-animations/web-animations-js#~2.0.0"
-  },
-  "devDependencies": {
-    "iron-component-page": "PolymerElements/iron-component-page#~0.9.6"
   }
 }
