@@ -69,29 +69,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
 
     <script>
-      var CLICK_THRESHOLD = 0.1;
-      var pageableText = document.querySelector('pageable-text');
+      window.addEventListener('WebComponentsReady', function() {
+        var CLICK_THRESHOLD = 0.1;
+        var pageableText = document.querySelector('pageable-text');
 
-      pageableText.addEventListener('click', function(e) {
-        var percentX = e.clientX / pageableText.clientWidth;
-        if (percentX < CLICK_THRESHOLD) {
-          e.preventDefault();
-          pageableText.previousPage();
-        } else if (percentX > (1 - CLICK_THRESHOLD)) {
-          e.preventDefault();
-          pageableText.nextPage();
-        }
-      });
+        pageableText.addEventListener('click', function(e) {
+          var percentX = e.clientX / pageableText.clientWidth;
+          if (percentX < CLICK_THRESHOLD) {
+            e.preventDefault();
+            pageableText.previousPage();
+          } else if (percentX > (1 - CLICK_THRESHOLD)) {
+            e.preventDefault();
+            pageableText.nextPage();
+          }
+        });
 
-      window.addEventListener('keydown', function(e) {
-        if (e.keyCode === 37) {
-          e.preventDefault();
-          pageableText.previousPage();
-        }
-        if (e.keyCode === 39) {
-          e.preventDefault();
-          pageableText.nextPage();
-        }
+        window.addEventListener('keydown', function(e) {
+          if (e.keyCode === 37) {
+            e.preventDefault();
+            pageableText.previousPage();
+          }
+          if (e.keyCode === 39) {
+            e.preventDefault();
+            pageableText.nextPage();
+          }
+        });
       });
     </script>
   </body>
