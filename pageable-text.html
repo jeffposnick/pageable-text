@@ -154,9 +154,9 @@ The text is specified as child elements, and any standard HTML markup should be 
 
     _computeStyle: function(columnGap, fontFamily, fontSize, lineHeight, columns) {
       return '-webkit-column-gap: ' + columnGap + 'px; -moz-column-gap: ' + columnGap +
-             'px; column-gap: ' + columnGap + 'px; font-family: ' + fontFamily + '; font-size: ' +
-             fontSize + '; line-height: ' + lineHeight + '; -webkit-column-count: ' + columns +
-             '; -moz-column-count: ' + columns + '; column-count: ' + columns + ';';
+        'px; column-gap: ' + columnGap + 'px; font-family: ' + fontFamily + '; font-size: ' +
+        fontSize + '; line-height: ' + lineHeight + '; -webkit-column-count: ' + columns +
+        '; -moz-column-count: ' + columns + '; column-count: ' + columns + ';';
     },
 
     _percentRead: 0,
@@ -165,13 +165,12 @@ The text is specified as child elements, and any standard HTML markup should be 
     _windowResize: function() {
       var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
       this._columns = width > 600 ? 2 : 1;
+      this.async(this.repaginate, 1);
     },
 
     ready: function() {
       window.addEventListener('resize', this._windowResize.bind(this));
-      this._windowResize();
-
-      this.async(this.repaginate, 1);
+      this.async(this._windowResize, 1);
     }
   });
 </script>
