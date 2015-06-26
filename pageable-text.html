@@ -164,20 +164,11 @@ The text is specified as child elements, and any standard HTML markup should be 
           margin + 'px; transition: ' + transition;
       },
 
-      _percentRead: 0,
-      _columns: 1,
-
-      _windowResize: function() {
-        var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        this._columns = width > 600 ? 2 : 1;
-        this.async(this.repaginate, 1);
-      },
-
       ready: function() {
-        window.addEventListener('resize', this._windowResize.bind(this));
-        this.async(this._windowResize, 1);
+        this._columns = 2;
+        this._percentRead = 0;
+        this.async(this.repaginate, 1);
       }
     });
   </script>
 </dom-module>
-
